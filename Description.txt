@@ -1,0 +1,9 @@
+﻿FriendlyName: BizSol Tracker Reporting
+Description: BizSol Tracker Reporting Plugin
+Group: Tools
+SystemName: BizSolTracker.Reporting
+Version: 4.2.0
+MinAppVersion: 4.2.0
+DisplayOrder: 0
+FileName: BizSolTracker.Reporting.dll
+ResourceRootKey: BizSolTracker.Reporting
