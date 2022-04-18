@@ -115,10 +115,12 @@
     <Compile Include="Controllers\ReportingController.cs" />
     <Compile Include="DependencyRegistrar.cs" />
     <Compile Include="Filters\TrackerReportingFilter.cs" />
+    <Compile Include="Models\RegNotificationModel.cs" />
     <Compile Include="Notification\EmailNotificationExtension.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RouteProvider.cs" />
+    <Compile Include="Services\EmailNotificationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

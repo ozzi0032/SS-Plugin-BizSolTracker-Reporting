@@ -24,6 +24,9 @@ using SmartStore.Core.Domain.Localization;
 using SmartStore.Services.Messages;
 using SmartStore.Core.Domain.Messages;
 using SmartStore.Services.Authentication.External;
+using BizSolTracker.Reporting.Services;
+using SmartStore.Services;
+using SmartStore.Core.Data;
 
 namespace BizSolTracker.Reporting.Controllers
 {
@@ -49,6 +52,8 @@ namespace BizSolTracker.Reporting.Controllers
         private readonly IWebHelper _webHelper;
         private readonly LocalizationSettings _localizationSettings;
         private readonly CaptchaSettings _captchaSettings;
+        private readonly ICommonServices _services;
+        private readonly IDbContext _dbContext;
 
         public ReportingController(
               IAuthenticationService authenticationService,
@@ -70,7 +75,9 @@ namespace BizSolTracker.Reporting.Controllers
             IOpenAuthenticationService openAuthenticationService,
             IWebHelper webHelper,
             LocalizationSettings localizationSettings,
-            CaptchaSettings captchaSettings
+            CaptchaSettings captchaSettings,
+            ICommonServices commonServices,
+            IDbContext dbContext
             )
         {
             _authenticationService = authenticationService;
@@ -93,6 +100,8 @@ namespace BizSolTracker.Reporting.Controllers
             _webHelper = webHelper;
             _localizationSettings = localizationSettings;
             _captchaSettings = captchaSettings;
+            _services = commonServices;
+            _dbContext = dbContext;
         }
 
         [NonAction]
@@ -289,6 +298,8 @@ namespace BizSolTracker.Reporting.Controllers
                             }
                         }
                     }
+                    //Sends Confirmation Email
+                    NotifyUser(customer.Email);
 
                     // Login customer now
                     if (isApproved)
@@ -414,7 +425,15 @@ namespace BizSolTracker.Reporting.Controllers
 
         public void NotifyUser(string emailAddress)
         {
-
+            var _emailNotificationService = new EmailNotificationService(this._dbContext);
+            var msgTemplates = _emailNotificationService.GetMessageTemplates().Where(t => t.Name.Equals("RegConfirmation.ToAddress")).FirstOrDefault();
+            if (msgTemplates != null)
+            {
+                var template = _emailNotificationService.GetMessageTemplateNameById(msgTemplates.ID);
+                var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
+                var msg = Services.MessageFactory.SendRegConfirmationNotification(messageContext,emailAddress,"BizSol","Welcome to SmartStore!!!");
+            }
+            
         }
     }
 }

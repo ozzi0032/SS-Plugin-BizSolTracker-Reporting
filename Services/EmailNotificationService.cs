@@ -11,7 +11,7 @@ namespace BizSolTracker.Reporting.Services
 
         public EmailNotificationService(IDbContext dbContext)
         {
-            _context = dbContext;
+            this._context = dbContext;
         }
 
         public List<RegNotificationModel> GetMessageTemplates()
