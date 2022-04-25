@@ -27,6 +27,7 @@ using SmartStore.Services.Authentication.External;
 using BizSolTracker.Reporting.Services;
 using SmartStore.Services;
 using SmartStore.Core.Data;
+using BizSolTracker.Reporting.Models;
 
 namespace BizSolTracker.Reporting.Controllers
 {
@@ -54,6 +55,7 @@ namespace BizSolTracker.Reporting.Controllers
         private readonly CaptchaSettings _captchaSettings;
         private readonly ICommonServices _services;
         private readonly IDbContext _dbContext;
+        private readonly IBSTService _bSTService;
 
         public ReportingController(
               IAuthenticationService authenticationService,
@@ -77,7 +79,8 @@ namespace BizSolTracker.Reporting.Controllers
             LocalizationSettings localizationSettings,
             CaptchaSettings captchaSettings,
             ICommonServices commonServices,
-            IDbContext dbContext
+            IDbContext dbContext,
+            IBSTService bSTService
             )
         {
             _authenticationService = authenticationService;
@@ -102,6 +105,7 @@ namespace BizSolTracker.Reporting.Controllers
             _captchaSettings = captchaSettings;
             _services = commonServices;
             _dbContext = dbContext;
+            _bSTService = bSTService;
         }
 
         [NonAction]
@@ -301,6 +305,9 @@ namespace BizSolTracker.Reporting.Controllers
                     //Sends Confirmation Email
                     NotifyUser(customer.Email);
 
+                    //Add data to BST_Company
+                    AddCompanyRecord(customer);
+
                     // Login customer now
                     if (isApproved)
                         _authenticationService.SignIn(customer, true);
@@ -339,6 +346,30 @@ namespace BizSolTracker.Reporting.Controllers
                         customer.BillingAddress = defaultAddress;
                         customer.ShippingAddress = defaultAddress;
                     }
+
+                    // Assign Role "Company Admin" ----------->
+                    var registeredRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.CompanyAdmin);
+                    if (registeredRole == null)
+                    {
+                        throw new SmartException(T("Admin.Customers.CustomerRoles.CannotFoundRole", "Company Admin"));
+                    }
+
+                    if (_customerSettings.RegisterCustomerRoleId != 0)
+                    {
+                        var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
+                        if (customerRole != null && customerRole.Id != registeredRole.Id)
+                        {
+                            _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
+                        }
+                    }
+
+                    // Add to 'Company Admin' role.
+                    _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = registeredRole.Id });
+
+                    // Remove from 'Registered' role.
+                    var mappings = customer.CustomerRoleMappings.Where(x => !x.IsSystemMapping && x.CustomerRole.SystemName == SystemCustomerRoleNames.Registered).ToList();
+                    mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x));
+                    //                            ------------>
 
                     _customerService.UpdateCustomer(customer);
 
@@ -431,9 +462,33 @@ namespace BizSolTracker.Reporting.Controllers
             {
                 var template = _emailNotificationService.GetMessageTemplateNameById(msgTemplates.ID);
                 var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
-                var msg = Services.MessageFactory.SendRegConfirmationNotification(messageContext,emailAddress,"BizSol","Welcome to SmartStore!!!");
+                var msg = Services.MessageFactory.SendRegConfirmationNotification(messageContext, emailAddress, "BizSol", "Welcome to SmartStore!!!");
             }
-            
+
+        }
+
+        public void AddCompanyRecord(Customer customer)
+        {
+            var model = new BST_CompanyModel
+            {
+                Name = customer.Company,
+                Email = customer.Email,
+                KeyRef = Guid.NewGuid().ToString(),
+                CreatedOnUtc = DateTime.UtcNow,
+                CreatedBy = customer.Id
+            };
+
+            //Add record to the BST_Company
+            _bSTService.InsertCompanyInfo(model);
+
+            // BST Customer Mapping
+            var companyModel = _bSTService.GetCompanyInfo(customer.Id);
+            if (companyModel != null)
+                _bSTService.InsertCustomerMapping(new BST_Company_Customer_MappingModel
+                {
+                    CompanyId = companyModel.Id,
+                    CustomerId = companyModel.CreatedBy
+                });
         }
     }
 }
