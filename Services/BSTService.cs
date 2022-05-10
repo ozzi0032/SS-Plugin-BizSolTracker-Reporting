@@ -37,12 +37,25 @@ namespace BizSolTracker.Reporting.Services
             }
         }
 
-        public BST_CompanyModel GetCompanyInfo(int customerId)
+        public BST_CompanyModel GetCompanyInfoById(int customerId)
         {
             try
             {
                 var bst_companyModel = _bstCompanyRepo.Table.Where(company => company.CreatedBy == customerId).First();
                 return bst_companyModel;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public IQueryable<BST_CompanyModel> GetCompanyInfoList()
+        {
+            try
+            {
+                var list = _bstCompanyRepo.Table.Where(company => company.DeletedOnUtc == null);
+                return list;
             }
             catch (Exception ex)
             {

@@ -112,7 +112,57 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Site.css" />
+    <Content Include="Content\css\bootstrap.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\css\Default\animated-overlay.gif" />
+    <Content Include="Content\css\Default\editor.png" />
+    <Content Include="Content\css\Default\imagebrowser.png" />
+    <Content Include="Content\css\Default\indeterminate.gif" />
+    <Content Include="Content\css\Default\loading-image.gif" />
+    <Content Include="Content\css\Default\loading.gif" />
+    <Content Include="Content\css\Default\loading_2x.gif" />
+    <Content Include="Content\css\Default\markers.png" />
+    <Content Include="Content\css\Default\markers_2x.png" />
+    <Content Include="Content\css\Default\slider-h.gif" />
+    <Content Include="Content\css\Default\slider-v.gif" />
+    <Content Include="Content\css\Default\sprite.png" />
+    <Content Include="Content\css\Default\sprite_2x.png" />
+    <Content Include="Content\css\Default\sprite_kpi.png" />
+    <Content Include="Content\css\Default\sprite_kpi_2x.png" />
+    <Content Include="Content\css\images\back.png" />
+    <Content Include="Content\css\images\gray.png" />
+    <Content Include="Content\css\images\kendoui.svg" />
+    <Content Include="Content\css\images\red.png" />
+    <Content Include="Content\css\images\wp8_icons.png" />
+    <Content Include="Content\css\images\wp8_inverseicons.png" />
+    <Content Include="Content\css\kendo.bootstrap.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\css\kendo.common.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\css\kendo.default.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\css\kendo.mobile.all.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\js\bootstrap.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\js\jquery.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\js\jszip.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\js\kendo.all.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Site.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Description.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -126,6 +176,7 @@
     <Compile Include="DependencyRegistrar.cs" />
     <Compile Include="Filters\TrackerReportingFilter.cs" />
     <Compile Include="Models\BST_CompanyModel.cs" />
+    <Compile Include="Models\BST_CompanyViewModel.cs" />
     <Compile Include="Models\BST_Company_Customer_MappingModel.cs" />
     <Compile Include="Models\RegNotificationModel.cs" />
     <Compile Include="Notification\EmailNotificationExtension.cs" />
@@ -137,6 +188,8 @@
     <Compile Include="Services\IBSTService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\css\images\KendoUI.ttf" />
+    <Content Include="Content\css\images\KendoUI.woff" />
     <None Include="packages.config" />
     <Content Include="Views\Reporting\Register.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -148,6 +201,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\Reporting\Partials\_ExternalAuthentication.AM.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Reporting\UserList.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Web.Debug.config">

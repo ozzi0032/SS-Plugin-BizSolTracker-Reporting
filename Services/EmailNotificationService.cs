@@ -16,7 +16,7 @@ namespace BizSolTracker.Reporting.Services
 
         public List<RegNotificationModel> GetMessageTemplates()
         {
-            var query = @"select id, name from MessageTemplate where isactive = 1 and name like 'RegConfirmation.%'";
+            var query = @"select id, name from MessageTemplate where isactive = 1 and name like 'RegInvitation.%'";
             var templates = _context.SqlQuery<RegNotificationModel>(query).ToList();
             return templates;
         }

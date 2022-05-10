@@ -9,7 +9,8 @@ namespace BizSolTracker.Reporting.Services
     public partial interface IBSTService
     {
         void InsertCompanyInfo(BST_CompanyModel model);
-        BST_CompanyModel GetCompanyInfo(int customerId);
+        BST_CompanyModel GetCompanyInfoById(int customerId);
+        IQueryable<BST_CompanyModel> GetCompanyInfoList();
         void InsertCustomerMapping(BST_Company_Customer_MappingModel model);
     }
 }

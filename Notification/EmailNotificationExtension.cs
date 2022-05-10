@@ -1,12 +1,13 @@
 ﻿using SmartStore;
+using SmartStore.Core.Domain.Messages;
 using SmartStore.Services.Messages;
 
 namespace BizSolTracker.Reporting.Notification
 {
-    public static class EmailNotificationExtension
+    public partial class EmailNotificationExtension
     {
-        //public static CreateMessageResult SendRegConfirmationNotification(this IMessageFactory factory,
-        //MessageContext messageContext, string toAddress, string firmName ,string message)
+        //public  CreateMessageResult SendRegConfirmationNotification(this IMessageFactory factory,
+        //MessageContext messageContext, string toAddress, string firmName, string message)
         //{
         //    var model = new NamedModelPart("RegConfirmation")
         //    {

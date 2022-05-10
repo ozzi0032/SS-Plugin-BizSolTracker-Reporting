@@ -1,0 +1,136 @@
+﻿@{
+    Html.AddCssFileParts("~/Plugins/BizSolTracker.Reporting/Content/css/kendo.bootstrap.min.css",
+       "~/Plugins/BizSolTracker.Reporting/Content/css/kendo.common.min.css",
+       "~/Plugins/BizSolTracker.Reporting/Content/css/kendo.default.min.css");
+
+    Html.AddScriptParts("~/Plugins/BizSolTracker.Reporting/Content/js/kendo.all.min.js");
+}
+
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "UserList";
+}
+
+@*<div id="modalWindow" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                    <div id="modal-header">
+                        <button id="closeBtn" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Invite</h4>
+                    </div>
+                    <hr />
+                    <div id="row">
+                        <input id="emailInput" name="Email" type="text" value="" />
+                        <button id="sendBtn" type="submit" class="btn btn-sm">Send</button>
+                    </div>
+            </div>
+        </div>
+    </div>*@
+
+<div>
+    @{Html.SmartStore().Window()
+                  .Name("invitationModal").Title("Invite").Size(WindowSize.Medium).Content(@<text>
+    <div class="form-group row">
+        <label class="col-md-3 col-form-label">Email</label>
+        <input id="emailInput" name="Email" type="text" value="" />
+    </div>
+    <div class="row">
+        <div class="col-md-4 text-right">
+            <a class="btn btn-primary text-white" id="sendBtn">Send</a>
+        </div>
+    </div>
+
+                </text>).Render();
+
+    }
+</div>
+
+<div>
+    <button id="inviteBtn" type="button" class="btn btn-primary" style="height:35px;width:60px;text-align:center;">
+        <span>Invite</span>
+    </button>
+</div>
+<div id="userGrid">
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var gridDataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Plugins/BizSolTracker/GetUserList",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        Id: { type: "number" },
+                        Email: { type: "string" },
+                        Name: { type: "string" },
+                        Country: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 10,
+            sort: {
+                field: "Id",
+                dir: "asc"
+            }
+        });
+
+        $("#userGrid").kendoGrid({
+            dataSource: gridDataSource,
+            height: 300,
+            pageable: true,
+            sortable: true,
+            filterable: false,
+            //toolbar: "<a class='k-button' onclick='sendInvitation()'>Send Invitation</a>",
+            columns: [{
+                field: "Id",
+                title: "Company Id",
+                width: 160
+            }, {
+                field: "Email",
+                title: "Email",
+                width: 160,
+            }, {
+                field: "Name",
+                title: "Name",
+                width: 200,
+            }, {
+                field: "Country",
+                title: "Country"
+            }]
+        });
+    });
+
+    $("#inviteBtn")
+        .bind("click", function () {
+            $("#invitationModal").modal("show");
+            /*$("#inviteBtn").fadeOut(300);*/
+        });
+    $("#closeBtn").click(function () {
+        $("#invitationModal").modal("hide");
+        $("#inviteBtn").fadeIn(200);
+    });
+
+    $(document).on("click", "#sendBtn", function () {
+        debugger;
+        var emailInput = $("#invitationModal").find("#emailInput").val();
+        //Make post request to the method "InviteUser" -> ReportingController with Email as a param
+        $.ajax({
+            type: "POST",
+            url: "/Plugins/BizSolTracker/InviteUser?em=" + emailInput,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                alert(result);
+            }
+        });
+    });
+
+
+</script>
+
