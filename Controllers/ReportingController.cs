@@ -124,7 +124,7 @@ namespace BizSolTracker.Reporting.Controllers
         [HttpGet]
         [RewriteUrl(SslRequirement.Yes)]
         [GdprConsent]
-        public ActionResult Register()
+        public ActionResult Register(string key = null)
         {
             //check whether registration is allowed
             if (_customerSettings.UserRegistrationType == UserRegistrationType.Disabled)
@@ -136,6 +136,13 @@ namespace BizSolTracker.Reporting.Controllers
             model.AllowCustomersToSetTimeZone = _dateTimeSettings.AllowCustomersToSetTimeZone;
             model.DisplayVatNumber = _taxSettings.EuVatEnabled;
             model.VatRequired = _taxSettings.VatRequired;
+            // User Registration based on Email Invitation
+            if (key != null)
+            {
+                var companyList = _bSTService.GetCompanyInfoList();
+                var companyName = companyList.Where(x => x.KeyRef == key).Select(c => c.Name).FirstOrDefault();
+                model.Company = companyName;
+            }
 
             MiniMapper.Map(_customerSettings, model);
 
@@ -368,7 +375,7 @@ namespace BizSolTracker.Reporting.Controllers
 
                     // Remove from 'Registered' role.
                     var mappings = customer.CustomerRoleMappings.Where(x => !x.IsSystemMapping && x.CustomerRole.SystemName == SystemCustomerRoleNames.Registered).ToList();
-                    mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x));
+                    //mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x)); *for the SS there must be a Registered Role Assigned so we can't just assign a new role
                     //                            ------------>
 
                     _customerService.UpdateCustomer(customer);
@@ -473,10 +480,10 @@ namespace BizSolTracker.Reporting.Controllers
         }
 
         [HttpPost]
-        public JsonResult InviteUser([Bind(Prefix = "em")]string email)
+        public JsonResult InviteUser([Bind(Prefix = "em")] string email)
         {
             var bstCompany = _bSTService.GetCompanyInfoList();
-            string keyRef = bstCompany.Select(company => company.KeyRef).ToString();
+            string keyRef = bstCompany.Select(company => company.KeyRef).FirstOrDefault();
             var url = "Plugins/BizSolTracker/Register?key=" + keyRef;
             //Create Email Message
             var _emailNotificationService = new EmailNotificationService(this._dbContext);
@@ -488,8 +495,8 @@ namespace BizSolTracker.Reporting.Controllers
                 var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
                 var msg = Services.MessageFactory.SendRegInvitationNotification(messageContext, email, "BizSol", url);
             }
-            return Json(new { email },JsonRequestBehavior.AllowGet);
-        } 
+            return Json(new { email }, JsonRequestBehavior.AllowGet);
+        }
 
         //public void NotifyUser(string emailAddress)
         //{
