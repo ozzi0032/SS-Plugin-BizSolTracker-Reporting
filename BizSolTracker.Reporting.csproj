@@ -166,6 +166,8 @@
     <Content Include="Description.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Scripts\MessageTemplateScript_Invitation.sql" />
+    <Content Include="Scripts\MessageTemplateScript_Welcome.sql" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

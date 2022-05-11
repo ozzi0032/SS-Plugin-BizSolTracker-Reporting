@@ -29,11 +29,11 @@
                     <legend><span>@T("Account.YourPersonalDetails")</span></legend>
 
                     @*@if (this.EnableHoneypotProtection)
-                    {
-                        <div class="d-none">
-                            @Html.HoneypotField()
-                        </div>
-                    }*@
+                        {
+                            <div class="d-none">
+                                @Html.HoneypotField()
+                            </div>
+                        }*@
 
                     @if (Model.GenderEnabled)
                     {
@@ -61,13 +61,13 @@
                             <label class="col-md-3 col-form-label" for="DateOfBirthDay">@T("Account.Fields.DateOfBirth")</label>
                             <div class="col-md-9">
                                 @Html.DatePickerDropDowns(Html.FieldNameFor(x => x.DateOfBirthDay),
-                                         Html.FieldNameFor(x => x.DateOfBirthMonth),
-                                         Html.FieldNameFor(x => x.DateOfBirthYear),
-                                         DateTime.Now.Year - 110,
-                                         DateTime.Now.Year,
-                                         Model.DateOfBirthDay,
-                                         Model.DateOfBirthMonth,
-                                         Model.DateOfBirthYear)
+                                                                  Html.FieldNameFor(x => x.DateOfBirthMonth),
+                                                                  Html.FieldNameFor(x => x.DateOfBirthYear),
+                                                                  DateTime.Now.Year - 110,
+                                                                  DateTime.Now.Year,
+                                                                  Model.DateOfBirthDay,
+                                                                  Model.DateOfBirthMonth,
+                                                                  Model.DateOfBirthYear)
                                 @Html.ValidationMessageFor(model => model.DateOfBirthDay)
                                 @Html.ValidationMessageFor(model => model.DateOfBirthMonth)
                                 @Html.ValidationMessageFor(model => model.DateOfBirthYear)
@@ -109,23 +109,35 @@
                     @Html.ControlGroupFor(model => model.ConfirmPassword, editorType: InputEditorType.Password, required: true, breakpoint: "md")
 
                     @*@if (Model.DisplayCaptcha)
-                    {
-                        <div class="form-group row">
-                            <div class="captcha-box col-md-9 offset-md-3">
-                                @Html.Raw(Html.GenerateCaptcha())
+                        {
+                            <div class="form-group row">
+                                <div class="captcha-box col-md-9 offset-md-3">
+                                    @Html.Raw(Html.GenerateCaptcha())
+                                </div>
                             </div>
-                        </div>
-                    }*@
+                        }*@
                 </fieldset>
 
                 @if (Model.CompanyEnabled || Model.DisplayVatNumber)
                 {
                     <fieldset class="content-group">
                         <legend><span>@T("Account.CompanyDetails")</span></legend>
-
                         @if (Model.CompanyEnabled)
                         {
-                            @Html.ControlGroupFor(model => model.Company, required: Model.CompanyRequired, breakpoint: "md", additionalCtrlClasses: "remember")
+                            if (Model.Company == null)
+                            {
+                                @Html.ControlGroupFor(model => model.Company, required: Model.CompanyRequired, breakpoint: "md", additionalCtrlClasses: "remember")
+                            }
+                            else
+                            {
+                                <div class="form-group row">
+
+                                    @Html.LabelFor(model => model.Company, new { @class = "col-md-3 col-form-label required", @for = "Company Name" })
+                                    @Html.TextBoxFor(model => model.Company, new { @class = "col-md-9 form-control", @Value = Model.Company, @disabled = "disabled" })
+                                    
+
+                                </div>
+                            }
                         }
                         @if (Model.DisplayVatNumber)
                         {
@@ -177,13 +189,13 @@
                                 @Html.LabelFor(model => model.CountryId, new { @class = "col-md-3 col-form-label", @for = "CountryId" })
                                 <div class="col-md-9">
                                     @Html.DropDownList("CountryId", Model.AvailableCountries,
-                                             new
-                                             {
-                                                 @class = "form-control country-input country-selector remember",
-                                                 data_region_control_selector = "#StateProvinceId",
-                                                 data_states_ajax_url = Url.Action("GetStatesByCountryId", "Country"),
-                                                 data_addEmptyStateIfRequired = "true"
-                                             })
+                                                                      new
+                                                                      {
+                                                                          @class = "form-control country-input country-selector remember",
+                                                                          data_region_control_selector = "#StateProvinceId",
+                                                                          data_states_ajax_url = Url.Action("GetStatesByCountryId", "Country"),
+                                                                          data_addEmptyStateIfRequired = "true"
+                                                                      })
                                 </div>
                             </div>
                         }
@@ -272,7 +284,7 @@
 
 <script>
     $(function () {
-        setRememberedFormFields("registerVals");
+        //setRememberedFormFields("registerVals");
 
         _.delay(function () {
             $(".country-selector").trigger("change");

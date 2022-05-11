@@ -28,6 +28,8 @@ using BizSolTracker.Reporting.Services;
 using SmartStore.Services;
 using SmartStore.Core.Data;
 using BizSolTracker.Reporting.Models;
+using BizSolTracker.Reporting.Data;
+using System.Data.Entity;
 
 namespace BizSolTracker.Reporting.Controllers
 {
@@ -139,6 +141,7 @@ namespace BizSolTracker.Reporting.Controllers
             // User Registration based on Email Invitation
             if (key != null)
             {
+                Database.SetInitializer<BSTReportingObjectContext>(null);
                 var companyList = _bSTService.GetCompanyInfoList();
                 var companyName = companyList.Where(x => x.KeyRef == key).Select(c => c.Name).FirstOrDefault();
                 model.Company = companyName;
@@ -480,7 +483,7 @@ namespace BizSolTracker.Reporting.Controllers
         }
 
         [HttpPost]
-        public JsonResult InviteUser([Bind(Prefix = "em")] string email)
+        public void InviteUser([Bind(Prefix = "em")] string email)
         {
             var bstCompany = _bSTService.GetCompanyInfoList();
             string keyRef = bstCompany.Select(company => company.KeyRef).FirstOrDefault();
@@ -495,21 +498,20 @@ namespace BizSolTracker.Reporting.Controllers
                 var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
                 var msg = Services.MessageFactory.SendRegInvitationNotification(messageContext, email, "BizSol", url);
             }
-            return Json(new { email }, JsonRequestBehavior.AllowGet);
         }
 
-        //public void NotifyUser(string emailAddress)
-        //{
-        //    var _emailNotificationService = new EmailNotificationService(this._dbContext);
-        //    var msgTemplates = _emailNotificationService.GetMessageTemplates().Where(t => t.Name.Equals("RegConfirmation.ToAddress")).FirstOrDefault();
-        //    if (msgTemplates != null)
-        //    {
-        //        var template = _emailNotificationService.GetMessageTemplateNameById(msgTemplates.ID);
-        //        var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
-        //        var msg = Services.MessageFactory.SendRegConfirmationNotification(messageContext, emailAddress, "BizSol", "Welcome to SmartStore!!!");
-        //    }
+        public void WelcomeNewUser(string emailAddress)
+        {
+            var _emailNotificationService = new EmailNotificationService(this._dbContext);
+            var msgTemplates = _emailNotificationService.GetMessageTemplates().Where(t => t.Name.Equals("RegConfirmation.ToAddress")).FirstOrDefault();
+            if (msgTemplates != null)
+            {
+                var template = _emailNotificationService.GetMessageTemplateNameById(msgTemplates.ID);
+                var messageContext = MessageContext.Create(template, _services.WorkContext.WorkingLanguage.Id);
+                var msg = Services.MessageFactory.SendRegConfirmationNotification(messageContext, emailAddress, "BizSol", "Welcome to SmartStore!!!");
+            }
 
-        //}
+        }
 
         public void AddCompanyRecord(Customer customer)
         {
