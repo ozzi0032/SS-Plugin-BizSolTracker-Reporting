@@ -4,9 +4,11 @@
 @{
     Layout = "_Layout";
     Html.AddTitleParts(T("PageTitle.Register").Text);
+
+    string KeyRef = ViewData["KeyRef"] as string;
 }
 
-@using (Html.BeginForm("Register", "Reporting", new { returnUrl = this.Context.Request.QueryString["returnUrl"] }, FormMethod.Post, new { @class = "form-horizontal", id = "register-form" }))
+@using (Html.BeginForm("Register", "Reporting", new { returnUrl = this.Context.Request.QueryString["returnUrl"], key = KeyRef }, FormMethod.Post, new { @class = "form-horizontal", id = "register-form" }))
 {
     @Html.AntiForgeryToken()
 

@@ -172,11 +172,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ReportingController.cs" />
+    <Compile Include="Controllers\TrackerHomeController.cs" />
     <Compile Include="Data\BSTReportingObjectContext.cs" />
     <Compile Include="Data\Mappings\BSTCompanyModelMap.cs" />
     <Compile Include="Data\Mappings\BSTCustomerMappingModelMap.cs" />
     <Compile Include="DependencyRegistrar.cs" />
     <Compile Include="Filters\TrackerReportingFilter.cs" />
+    <Compile Include="Filters\TRHomeFilter.cs" />
     <Compile Include="Models\BST_CompanyModel.cs" />
     <Compile Include="Models\BST_CompanyViewModel.cs" />
     <Compile Include="Models\BST_Company_Customer_MappingModel.cs" />
@@ -208,6 +210,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Reporting\UserList.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\TrackerHome\Index.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Web.Debug.config">

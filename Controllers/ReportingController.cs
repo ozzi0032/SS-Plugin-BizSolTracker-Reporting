@@ -182,13 +182,14 @@ namespace BizSolTracker.Reporting.Controllers
                     }
                 }
             }
+            ViewData["KeyRef"] = key;
             return View(model);
         }
 
         [HttpPost]
         [GdprConsent]
         [ValidateAntiForgeryToken, ValidateCaptcha, ValidateHoneypot]
-        public ActionResult Register(RegisterModel model, string returnUrl, string captchaError)
+        public ActionResult Register(RegisterModel model, string returnUrl, string captchaError,string key)
         {
             // Check whether registration is allowed.
             if (_customerSettings.UserRegistrationType == UserRegistrationType.Disabled)
@@ -312,11 +313,63 @@ namespace BizSolTracker.Reporting.Controllers
                             }
                         }
                     }
-                    //Sends Confirmation Email
-                    //        NotifyUser(customer.Email);
+                    // Add Company Record for Company Admin Registration and Customer Mapping for Normal User
+                    if(string.IsNullOrEmpty(key))
+                    {
+                        //Add Company Record
+                        AddCompanyRecord(customer);
 
-                    //Add data to BST_Company
-                    AddCompanyRecord(customer);
+                        // Assign Role "Company Admin" ----------->
+                        var registeredRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.CompanyAdmin);
+                        if (registeredRole == null)
+                        {
+                            throw new SmartException(T("Admin.Customers.CustomerRoles.CannotFoundRole", "Company Admin"));
+                        }
+
+                        if (_customerSettings.RegisterCustomerRoleId != 0)
+                        {
+                            var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
+                            if (customerRole != null && customerRole.Id != registeredRole.Id)
+                            {
+                                _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
+                            }
+                        }
+
+                        // Add to 'Company Admin' role.
+                        _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = registeredRole.Id });
+
+                        // Remove from 'Registered' role.
+                        var mappings = customer.CustomerRoleMappings.Where(x => !x.IsSystemMapping && x.CustomerRole.SystemName == SystemCustomerRoleNames.Registered).ToList();
+                        //mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x)); *for the SS there must be a Registered Role Assigned so we can't just assign a new role
+                        //                            ------------>
+                    }
+                    else
+                    {
+                        //Add Customer Mapping
+                        AddCustomerRoleMapping(customer.Id, key);
+
+                        // Assign Role "User" ----------->
+                        var userRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.User);
+                        if (userRole == null)
+                        {
+                            throw new SmartException(T("Admin.Customers.CustomerRoles.CannotFoundRole", "User"));
+                        }
+
+                        if (_customerSettings.RegisterCustomerRoleId != 0)
+                        {
+                            var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
+                            if (customerRole != null && customerRole.Id != userRole.Id)
+                            {
+                                _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
+                            }
+                        }
+
+                        // Add to 'Company Admin' role.
+                        _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = userRole.Id });
+
+                        //Welcome Message to newly registered user
+                        WelcomeNewUser(customer.Email);
+                    }
 
                     // Login customer now
                     if (isApproved)
@@ -356,31 +409,6 @@ namespace BizSolTracker.Reporting.Controllers
                         customer.BillingAddress = defaultAddress;
                         customer.ShippingAddress = defaultAddress;
                     }
-
-                    // Assign Role "Company Admin" ----------->
-                    var registeredRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.CompanyAdmin);
-                    if (registeredRole == null)
-                    {
-                        throw new SmartException(T("Admin.Customers.CustomerRoles.CannotFoundRole", "Company Admin"));
-                    }
-
-                    if (_customerSettings.RegisterCustomerRoleId != 0)
-                    {
-                        var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
-                        if (customerRole != null && customerRole.Id != registeredRole.Id)
-                        {
-                            _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
-                        }
-                    }
-
-                    // Add to 'Company Admin' role.
-                    _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = registeredRole.Id });
-
-                    // Remove from 'Registered' role.
-                    var mappings = customer.CustomerRoleMappings.Where(x => !x.IsSystemMapping && x.CustomerRole.SystemName == SystemCustomerRoleNames.Registered).ToList();
-                    //mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x)); *for the SS there must be a Registered Role Assigned so we can't just assign a new role
-                    //                            ------------>
-
                     _customerService.UpdateCustomer(customer);
 
                     // Notifications
@@ -471,15 +499,15 @@ namespace BizSolTracker.Reporting.Controllers
 
         public ActionResult GetUserList()
         {
-            var userList = _bSTService.GetCompanyInfoList();
-            var list = userList.Select(user => new BST_CompanyViewModel
+            var company = _bSTService.GetCompanyInfoByUserId(_workContext.CurrentCustomer.Id); //Company Admin acting as a current user
+            var usersMap = _bSTService.GetCustomerMapping(company.Id).Select(user => new BST_CompanyViewModel
             {
                 Id = user.Id,
-                Email = user.Email,
-                Name = user.Name,
-                Country = user.Country,
+                Email = "user.Email",
+                Name = "user.Name",
+                Country = "user.Country",
             }).ToList();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            return Json(usersMap, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -527,13 +555,25 @@ namespace BizSolTracker.Reporting.Controllers
             //Add record to the BST_Company
             _bSTService.InsertCompanyInfo(model);
 
-            // BST Customer Mapping
-            var companyModel = _bSTService.GetCompanyInfoById(customer.Id);
+            // BST Company Admin Mapping
+            var companyModel = _bSTService.GetCompanyInfoByKey(model.KeyRef);
             if (companyModel != null)
                 _bSTService.InsertCustomerMapping(new BST_Company_Customer_MappingModel
                 {
                     CompanyId = companyModel.Id,
                     CustomerId = companyModel.CreatedBy
+                });
+        }
+
+        public void AddCustomerRoleMapping(int id,string key)
+        {
+            // BST User Mapping
+            var companyModel = _bSTService.GetCompanyInfoByKey(key);
+            if (companyModel != null)
+                _bSTService.InsertCustomerMapping(new BST_Company_Customer_MappingModel
+                {
+                    CompanyId = companyModel.Id,
+                    CustomerId = id
                 });
         }
     }

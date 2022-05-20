@@ -26,6 +26,8 @@ namespace BizSolTracker.Reporting
 
             builder.RegisterType<BSTService>().As<IBSTService>().InstancePerRequest();
 
+            builder.RegisterType<TRHomeFilter>()
+                    .AsActionFilterFor<HomeController>().InstancePerRequest();
             builder.RegisterType<TrackerReportingFilter>()
                     .AsActionFilterFor<CustomerController>().InstancePerRequest();
 

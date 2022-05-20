@@ -33,25 +33,6 @@ namespace BizSolTracker.Reporting.Filters
                         );
                     filterContext.Result = new RedirectToRouteResult("BizSolTracker.Reporting", _routeValues);
                 }
-
-                //if (filterContext.HttpContext.Request.HttpMethod == "POST")
-                //{
-                //    RegisterModel registerModel = filterContext.ActionParameters["model"] as RegisterModel;
-                //    filterContext.ActionParameters.Remove("model");
-                //    filterContext.ActionParameters.Add("model", registerModel);
-
-                //    var _routeValues = new RouteValueDictionary(
-                //        new
-                //        {
-                //            controller = "Reporting",
-                //            action = "Register",
-                //            area = Plugin.SystemName,
-                //            model = filterContext.ActionParameters["model"] as RegisterModel,
-                //            returnUrl = filterContext.ActionParameters["returnUrl"],
-                //        }
-                //        );
-                //    filterContext.Result = new RedirectToRouteResult("BizSolTracker.Reporting", _routeValues);
-                //}
             }
         }
 
